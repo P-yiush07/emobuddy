@@ -44,7 +44,6 @@ export default function EmoBuddy() {
   ])
   const [activeConversation, setActiveConversation] = useLocalStorage<string>('emobuddy-active-conversation', '1')
   const [currentTab, setCurrentTab] = useState('chat')
-  const [genAI, setGenAI] = useState<GoogleGenerativeAI | null>(null);
   const [model, setModel] = useState<GenerativeModel | null>(null);
   const [chatSession, setChatSession] = useState<ChatSession | null>(null);
 
@@ -60,7 +59,6 @@ export default function EmoBuddy() {
   useEffect(() => {
     const initializeGenAI = async () => {
       const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY as string);
-      setGenAI(genAI);
 
       const model = genAI.getGenerativeModel({
         model: "tunedModels/mental-ai-f1my9p0ommji",
