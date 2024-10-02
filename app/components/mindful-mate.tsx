@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -115,16 +114,21 @@ export default function EmoBuddy() {
     e.preventDefault()
     if (input.trim() && chatSession && currentConversation) {
       const newMessage: Message = { id: Date.now().toString(), role: 'user', content: input.trim(), timestamp: new Date().toISOString() }
+      
+      // Update conversations and title in a single state update
       setConversations(prevConversations => {
         const updatedConversations = prevConversations.map(conv => 
           conv.id === activeConversation 
-            ? { ...conv, messages: [...conv.messages, newMessage] }
+            ? { 
+                ...conv, 
+                messages: [...conv.messages, newMessage],
+                title: conv.title === 'New Conversation' ? (input.length > 30 ? input.substring(0, 30) + '...' : input) : conv.title
+              }
             : conv
         )
-        // Update the conversation title here
-        updateConversationTitle(activeConversation, updatedConversations);
         return updatedConversations;
       })
+      
       setInput('')
       setIsTyping(true)
       
@@ -234,26 +238,6 @@ export default function EmoBuddy() {
     }
   }
 
-  const updateConversationTitle = (conversationId: string, currentConversations: Conversation[]) => {
-    const conversation = currentConversations.find(conv => conv.id === conversationId);
-    if (!conversation) return;
-
-    const firstUserMessage = conversation.messages.find(m => m.role === 'user')?.content;
-    if (!firstUserMessage) return;
-
-    const shortTitle = firstUserMessage.length > 30 
-      ? firstUserMessage.substring(0, 30) + '...' 
-      : firstUserMessage;
-
-    setConversations(prevConversations => 
-      prevConversations.map(conv => 
-        conv.id === conversationId 
-          ? { ...conv, title: shortTitle }
-          : conv
-      )
-    );
-  }
-
   const deleteConversation = (conversationId: string) => {
     setConversations(prevConversations => 
       prevConversations.filter(conv => conv.id !== conversationId)
@@ -270,57 +254,66 @@ export default function EmoBuddy() {
 
   return (
     <div className={`min-h-screen ${isDarkMode ? 'dark' : ''}`}>
-      <div className="relative flex flex-col items-center justify-center min-h-screen bg-gradient-to-b from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 p-4 transition-colors duration-300">
-        {/* LinkedIn banner outside the card */}
+      <div className="flex flex-col h-screen bg-gradient-to-b from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 transition-colors duration-300">
+        {/* LinkedIn banner */}
         <a
           href="https://www.linkedin.com/in/piyush-kumar-a85653288/"
           target="_blank"
           rel="noopener noreferrer"
-          className="absolute top-4 right-4 flex items-center bg-white dark:bg-gray-800 text-blue-600 hover:text-white hover:bg-blue-600 px-4 py-2 rounded-full shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+          className="absolute top-4 right-4 z-10 sm:flex items-center bg-white dark:bg-gray-800 text-blue-600 hover:text-white hover:bg-blue-600 px-2 sm:px-4 py-2 rounded-full shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 hidden"
         >
-          <span className="mr-2 font-semibold text-sm">Contact the Developer</span>
-          <LinkedinIcon className="h-6 w-6 ml-2" />
+          <span className="mr-2 font-semibold text-sm hidden sm:inline">Contact the Developer</span>
+          <LinkedinIcon className="h-6 w-6" />
         </a>
 
-        <Card className="w-full max-w-4xl shadow-xl bg-white/80 dark:bg-gray-800/80 backdrop-blur-md transition-colors duration-300 overflow-hidden">
-          <div className="bg-green-100 dark:bg-green-900 p-4 flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <LeafIcon className="h-8 w-8 text-green-600 dark:text-green-400" />
-              <h1 className="text-2xl font-semibold text-green-800 dark:text-green-200">EmoBuddy</h1>
+        <div className="flex-grow overflow-hidden sm:p-4">
+          <div className="h-full w-full max-w-4xl mx-auto bg-white/80 dark:bg-gray-800/80 backdrop-blur-md transition-colors duration-300 overflow-hidden sm:shadow-xl sm:rounded-lg flex flex-col">
+            <div className="bg-green-100 dark:bg-green-900 p-4 flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <LeafIcon className="h-8 w-8 text-green-600 dark:text-green-400" />
+                <h1 className="text-2xl font-semibold text-green-800 dark:text-green-200">EmoBuddy</h1>
+              </div>
+              <div className="flex items-center space-x-2">
+                {/* LinkedIn icon for mobile */}
+                <a
+                  href="https://www.linkedin.com/in/piyush-kumar-a85653288/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="sm:hidden flex items-center justify-center w-8 h-8 bg-white dark:bg-gray-800 text-blue-600 hover:text-white hover:bg-blue-600 rounded-full shadow-lg transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                >
+                  <LinkedinIcon className="h-4 w-4" />
+                </a>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={startNewConversation}
+                  className="text-green-800 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-800 transition-colors duration-300"
+                >
+                  New Chat
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={toggleDarkMode}
+                  className="text-green-800 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-800 transition-colors duration-300"
+                >
+                  {isDarkMode ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
+                </Button>
+              </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={startNewConversation}
-                className="text-green-800 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-800 transition-colors duration-300"
-              >
-                New Chat
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={toggleDarkMode}
-                className="text-green-800 dark:text-green-200 hover:bg-green-200 dark:hover:bg-green-800 transition-colors duration-300"
-              >
-                {isDarkMode ? <SunIcon className="h-5 w-5" /> : <MoonIcon className="h-5 w-5" />}
-              </Button>
-            </div>
-          </div>
-          <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
-            <TabsList className="w-full bg-green-50 dark:bg-green-950">
-              <TabsTrigger value="chat" className="w-1/2">
-                <MessageCircleIcon className="w-4 h-4 mr-2" />
-                Current Chat
-              </TabsTrigger>
-              <TabsTrigger value="history" className="w-1/2">
-                <HistoryIcon className="w-4 h-4 mr-2" />
-                Chat History
-              </TabsTrigger>
-            </TabsList>
-            <TabsContent value="chat" className="p-0">
-              <CardContent className="p-0">
-                <ScrollArea className="h-[400px] p-4 scroll-area" ref={scrollAreaRef}>
+            <Tabs value={currentTab} onValueChange={setCurrentTab} className="flex-grow flex flex-col">
+              <TabsList className="w-full bg-green-50 dark:bg-green-950">
+                <TabsTrigger value="chat" className="w-1/2">
+                  <MessageCircleIcon className="w-4 h-4 mr-2" />
+                  Current Chat
+                </TabsTrigger>
+                <TabsTrigger value="history" className="w-1/2">
+                  <HistoryIcon className="w-4 h-4 mr-2" />
+                  Chat History
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="chat" className="flex-grow flex flex-col p-0 overflow-hidden">
+                <ScrollArea className="flex-grow px-4 py-2">
                   {isClient && currentConversation?.messages.map((message) => (
                     <div
                       key={message.id}
@@ -373,57 +366,59 @@ export default function EmoBuddy() {
                     </div>
                   )}
                 </ScrollArea>
-              </CardContent>
-              <CardFooter className="p-4 bg-green-50/80 dark:bg-green-950/80 backdrop-blur-sm transition-colors duration-300">
-                <form onSubmit={handleSubmit} className="flex w-full space-x-2">
-                  <Input
-                    value={input}
-                    onChange={handleInputChange}
-                    placeholder="Share your thoughts..."
-                    className="flex-grow bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-gray-900 dark:text-gray-100 transition-colors duration-300 border-green-200 dark:border-green-800 focus:ring-green-500 focus:border-green-500"
-                  />
-                  <Button type="submit" className="bg-green-500 hover:bg-green-600 text-white transition-colors duration-300">
-                    <SendIcon className="h-5 w-5" />
-                    <span className="sr-only">Send</span>
-                  </Button>
-                </form>
-              </CardFooter>
-            </TabsContent>
-            <TabsContent value="history" className="p-4">
-              <ScrollArea className="h-[400px]">
-                {conversations.map((conversation) => (
-                  <div key={conversation.id} className="mb-4 p-3 bg-white dark:bg-gray-700 rounded-lg shadow">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-semibold text-green-800 dark:text-green-200">
-                          {conversation.title || 'New Conversation'}
-                        </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                          {conversation.messages.length} messages
-                        </p>
-                      </div>
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={() => deleteConversation(conversation.id)}
-                        className="text-red-500 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-900"
-                      >
-                        <TrashIcon className="h-5 w-5" />
-                      </Button>
-                    </div>
-                    <Button 
-                      variant="link" 
-                      onClick={() => switchConversation(conversation.id)}
-                      className="mt-2 text-green-600 dark:text-green-400"
-                    >
-                      View Conversation
+                <div className="p-4 bg-green-50/80 dark:bg-green-950/80 backdrop-blur-sm transition-colors duration-300">
+                  <form onSubmit={handleSubmit} className="flex w-full space-x-2">
+                    <Input
+                      value={input}
+                      onChange={handleInputChange}
+                      placeholder="Share your thoughts..."
+                      className="flex-grow bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm text-gray-900 dark:text-gray-100 transition-colors duration-300 border-green-200 dark:border-green-800 focus:ring-green-500 focus:border-green-500"
+                    />
+                    <Button type="submit" className="bg-green-500 hover:bg-green-600 text-white transition-colors duration-300">
+                      <SendIcon className="h-5 w-5" />
+                      <span className="sr-only">Send</span>
                     </Button>
+                  </form>
+                </div>
+              </TabsContent>
+              <TabsContent value="history" className="flex-grow overflow-hidden">
+                <ScrollArea className="h-full px-4 py-2">
+                  <div className="space-y-4">
+                    {conversations.map((conversation) => (
+                      <div key={conversation.id} className="p-3 bg-white dark:bg-gray-700 rounded-lg shadow">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h3 className="font-semibold text-green-800 dark:text-green-200">
+                              {conversation.title || 'New Conversation'}
+                            </h3>
+                            <p className="text-sm text-gray-600 dark:text-gray-400">
+                              {conversation.messages.length} messages
+                            </p>
+                          </div>
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            onClick={() => deleteConversation(conversation.id)}
+                            className="text-red-500 hover:text-red-700 hover:bg-red-100 dark:hover:bg-red-900"
+                          >
+                            <TrashIcon className="h-5 w-5" />
+                          </Button>
+                        </div>
+                        <Button 
+                          variant="link" 
+                          onClick={() => switchConversation(conversation.id)}
+                          className="mt-2 text-green-600 dark:text-green-400"
+                        >
+                          View Conversation
+                        </Button>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </ScrollArea>
-            </TabsContent>
-          </Tabs>
-        </Card>
+                </ScrollArea>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </div>
       </div>
     </div>
   )
