@@ -253,8 +253,8 @@ export default function EmoBuddy() {
   }
 
   return (
-    <div className={`min-h-screen ${isDarkMode ? 'dark' : ''}`}>
-      <div className="flex flex-col h-screen bg-gradient-to-b from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 transition-colors duration-300">
+    <div className={`h-[100dvh] flex flex-col ${isDarkMode ? 'dark' : ''}`}>
+      <div className="flex-grow flex flex-col overflow-hidden bg-gradient-to-b from-green-50 to-green-100 dark:from-green-900 dark:to-green-800 transition-colors duration-300">
         {/* LinkedIn banner */}
         <a
           href="https://www.linkedin.com/in/piyush-kumar-a85653288/"
@@ -266,14 +266,14 @@ export default function EmoBuddy() {
           <LinkedinIcon className="h-6 w-6" />
         </a>
 
-        <div className="flex-grow overflow-hidden sm:p-4">
-          <div className="h-full w-full max-w-4xl mx-auto bg-white/80 dark:bg-gray-800/80 backdrop-blur-md transition-colors duration-300 overflow-hidden sm:shadow-xl sm:rounded-lg flex flex-col">
+        <div className="flex-grow overflow-hidden sm:p-4 flex flex-col">
+          <div className="w-full max-w-4xl mx-auto bg-white/80 dark:bg-gray-800/80 backdrop-blur-md transition-colors duration-300 overflow-hidden sm:shadow-xl sm:rounded-lg flex flex-col flex-grow">
             <div className="bg-green-100 dark:bg-green-900 p-4 flex items-center justify-between">
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2">
                 <LeafIcon className="h-8 w-8 text-green-600 dark:text-green-400" />
                 <h1 className="text-2xl font-semibold text-green-800 dark:text-green-200">EmoBuddy</h1>
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-1 ml-2 sm:ml-4">
                 {/* LinkedIn icon for mobile */}
                 <a
                   href="https://www.linkedin.com/in/piyush-kumar-a85653288/"
@@ -301,7 +301,7 @@ export default function EmoBuddy() {
                 </Button>
               </div>
             </div>
-            <Tabs value={currentTab} onValueChange={setCurrentTab} className="flex-grow flex flex-col">
+            <Tabs value={currentTab} onValueChange={setCurrentTab} className="flex-grow flex flex-col overflow-hidden">
               <TabsList className="w-full bg-green-50 dark:bg-green-950">
                 <TabsTrigger value="chat" className="w-1/2">
                   <MessageCircleIcon className="w-4 h-4 mr-2" />
@@ -312,8 +312,8 @@ export default function EmoBuddy() {
                   Chat History
                 </TabsTrigger>
               </TabsList>
-              <TabsContent value="chat" className="flex-grow flex flex-col p-0 overflow-hidden">
-                <ScrollArea className="flex-grow px-4 py-2">
+              <TabsContent value="chat" className="flex-grow flex flex-col overflow-hidden">
+                <ScrollArea className="flex-grow px-4 py-2" ref={scrollAreaRef}>
                   {isClient && currentConversation?.messages.map((message) => (
                     <div
                       key={message.id}
